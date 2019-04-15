@@ -26,36 +26,31 @@ import (
 )
 
 // const
-const serverConfigPath = "../config/access_server.conf"
+const serverConfigPath = "../conf/template_server.conf"
 
 // internal
 var configManager ConfigManager
 
-func GetConfigManager() *ConfigManager {
+func GetInstance() *ConfigManager {
 	return &configManager
 }
 
 // ConfigManager struct & interface define
 type ConfigManagerInterface interface {
-	Init() bool
+	Init(configFilePath string) bool
 }
 
 type ConfigManager struct {
-	ConfigFilePath string
-	Addr           string // ip:port
-	PemPath        string // https pem file
-	KeyPath        string // https key file
-	Relay          struct {
-		AppFilter struct {
-			Enable bool
-			List   []string
-		}
-		Blacklist []string
-	}
+	ConfigFilePath      string
+	Addr                string // ip:port
+	PemPath             string // https pem file
+	KeyPath             string // https key file
 	RouterTableFilePath string
 }
 
-func (this *ConfigManager) Init() bool {
+func (this *ConfigManager) Init(configFilePath string) bool {
+	this.ConfigFilePath = configFilePath
+
 	content, e := ioutil.ReadFile(this.ConfigFilePath)
 	if e != nil {
 		glog.Errorf("File error: %v\n", e)

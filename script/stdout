@@ -1,0 +1,5 @@
+I0415 12:24:59.194945    3537 config_manager.go:66] Read config file: ./conf/template_server.conf
+I0415 12:24:59.196658    3537 config_manager.go:68] Results: &{./conf/template_server.conf 127.0.0.1:9003   ../config/router_table.conf}
+I0415 12:24:59.197057    3537 template_server.go:50] Load server config success
+I0415 12:24:59.197419    3537 template_server.go:82] Start server...
+I0415 12:25:08.290416    3537 template_server.go:86] Get a rpc request

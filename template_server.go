@@ -14,63 +14,81 @@
  * limitations under the License.
  */
 
-package main 
+package main
 
 import (
-    "flag"
-    glog "github.com/golang/glog"
-	config "github.com/gotp/template_server/config"
-    httpservice "github.com/gotp/template_server/service/http"
+	"flag"
+	glog "github.com/golang/glog"
+	proto "github.com/gotp/proto/template_server"
+	rpc "github.com/gotp/template_server/framework/rpc"
+	confmgr "github.com/gotp/template_server/module/config"
+	service "github.com/gotp/template_server/service"
 
-    "flag"
-    "net/http"
-    "strings"
+	"net/http"
+	"strings"
 
-    confmgr "online_consultant/server/template_server/config"
-    httpservice "online_consultant/server/template_server/service/http_service"
-    rpcservice "online_consultant/server/template_server/service/rpc_service"
-    svrresolver "online_consultant/server/template_server/service/name_resolver"
-
-    glog "github.com/golang/glog"
-    "golang.org/x/net/http2"
-    "golang.org/x/net/http2/h2c"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 )
 
 const (
-    defaultConfigFilePath string = "../config/template_server.conf"
+	defaultConfigFilePath string = "./conf/template_server.conf"
 )
 
+var configManager *confmgr.ConfigManager
+
 func init() {
-    configManager := confmgr.GetInstance()
-    flag.StringVar(&configManager.ConfigFilePath, "config", defaultConfigFilePath, "Config file path")
-    flag.Parse()
+	var configFilePath string
+	flag.StringVar(&configFilePath, "config", defaultConfigFilePath, "Config file path")
+	flag.Parse()
+
+	// Load config
+	configManager = confmgr.GetInstance()
+	if !configManager.Init(configFilePath) {
+		glog.Fatal("Load server config failed!")
+	}
+	glog.Info("Load server config success")
+
+	/*
+	   	// Load router table
+	   	routerTable := config.GetRouterTable()
+	   	if !routerTable.Init(configManager.RouterTableFilePath) {
+	   		glog.Fatal("Load router table failed!")
+	   	}
+	       glog.Info("Load router table success")
+
+	        // Load resolver config
+	       if svrresolver.GetResolverConfig().Init(configManager.ResolverConfigFilePath) == false {
+	           glog.Fatal("Load resolver config failed!")
+	       }
+	       glog.Info("Load resolver config success")
+	*/
+}
+
+func registerService() {
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// Please not remove or modify comment below, it's anchor for new code
+	// ############################# SERVICE #############################
+	//proto.RegisterTemplateServiceServer(rpcServer, &service.TemplateService{})
 }
 
 func main() {
-    // Load config
-    configManager := confmgr.GetInstance()
-    if configManager.Init() == false {
-        glog.Fatal("Load server config failed!")
-    }
-    glog.Info("Load server config success")
-    // Load resolver config
-    if svrresolver.GetResolverConfig().Init(configManager.ResolverConfigFilePath) == false {
-        glog.Fatal("Load resolver config failed!")
-    }
-    glog.Info("Load resolver config success")
-    
-    // Create servers
-    httpHandler := httpservice.CreateHandler()
-    rpcServer := rpcservice.CreateServer()
-    // Start server
-    glog.Info("Start server...")
-    http.ListenAndServe(configManager.Addr,
-        h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-            if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
-                rpcServer.ServeHTTP(w, r)
-            } else {
-                httpHandler.ServeHTTP(w, r)
-            }
-        }), &http2.Server{}),
-    )
+	// Create servers
+	//httpHandler := httpservice.CreateHandler()
+	rpcServer := rpc.NewServer()
+	// Register service
+	proto.RegisterTemplateServiceServer(rpcServer, &service.TemplateService{})
+	// Start server
+	glog.Info("Start server...")
+	http.ListenAndServe(configManager.Addr,
+		h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
+				glog.V(2).Info("Get a rpc request")
+				rpcServer.ServeHTTP(w, r)
+			} else {
+				glog.V(2).Info("Get a http request")
+				//httpHandler.ServeHTTP(w, r)
+			}
+		}), &http2.Server{}),
+	)
 }
