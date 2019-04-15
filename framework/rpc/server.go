@@ -22,13 +22,15 @@ import (
 
 // RpcServer
 type RpcServer struct {
-	Server  *grpc.Server
+	server  *grpc.Server
 }
 
-func NewServer() (*grpc.Server) {
-	return grpc.NewServer()
+func NewServer() (*RpcServer) {
+	rpcServer := new(RpcServer)
+	rpcServer.server = grpc.NewServer()
+	return rpcServer
 }
 
 func (this *RpcServer) GetServer() (*grpc.Server) {
-	return this.Server
+	return this.server
 }

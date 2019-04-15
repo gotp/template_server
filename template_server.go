@@ -65,30 +65,36 @@ func init() {
 	*/
 }
 
-func registerService() {
+func registerService(rpcServer *rpc.RpcServer) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Please not remove or modify comment below, it's anchor for new code
 	// ############################# SERVICE #############################
-	//proto.RegisterTemplateServiceServer(rpcServer, &service.TemplateService{})
+	proto.RegisterTemplateServiceServer(rpcServer.GetServer(), &service.TemplateService{})
 }
 
-func main() {
-	// Create servers
-	//httpHandler := httpservice.CreateHandler()
-	rpcServer := rpc.NewServer()
-	// Register service
-	proto.RegisterTemplateServiceServer(rpcServer, &service.TemplateService{})
-	// Start server
-	glog.Info("Start server...")
+func startServer(rpcServer *rpc.RpcServer) {
 	http.ListenAndServe(configManager.Addr,
 		h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 				glog.V(2).Info("Get a rpc request")
-				rpcServer.ServeHTTP(w, r)
+				rpcServer.GetServer().ServeHTTP(w, r)
 			} else {
 				glog.V(2).Info("Get a http request")
 				//httpHandler.ServeHTTP(w, r)
 			}
 		}), &http2.Server{}),
 	)
+}
+
+func main() {
+	// Create servers
+	glog.Info("Create server...")
+	//httpHandler := httpservice.CreateHandler()
+	rpcServer := rpc.NewServer()
+	// Register service
+	glog.Info("Register service...")
+	registerService(rpcServer)
+	// Start server
+	glog.Info("Start server...")
+	startServer(rpcServer)
 }

@@ -1,5 +1,8 @@
-I0415 12:24:59.194945    3537 config_manager.go:66] Read config file: ./conf/template_server.conf
-I0415 12:24:59.196658    3537 config_manager.go:68] Results: &{./conf/template_server.conf 127.0.0.1:9003   ../config/router_table.conf}
-I0415 12:24:59.197057    3537 template_server.go:50] Load server config success
-I0415 12:24:59.197419    3537 template_server.go:82] Start server...
-I0415 12:25:08.290416    3537 template_server.go:86] Get a rpc request
+I0415 16:02:17.253813    3038 config_manager.go:66] Read config file: ./conf/template_server.conf
+I0415 16:02:17.254719    3038 config_manager.go:68] Results: &{./conf/template_server.conf 127.0.0.1:9003   ../config/router_table.conf}
+I0415 16:02:17.255591    3038 template_server.go:50] Load server config success
+I0415 16:02:17.256089    3038 template_server.go:91] Create server...
+I0415 16:02:17.256596    3038 template_server.go:95] Register service...
+I0415 16:02:17.257243    3038 template_server.go:98] Start server...
+I0415 16:02:37.300578    3038 template_server.go:79] Get a rpc request
+I0415 16:02:37.305435    3038 template_service.go:18] header:<requestId:"R00001" clientId:"C00001" clientType:H5Client version:"V1" testFlag:true > data:<dummy:1 > 

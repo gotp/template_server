@@ -3,7 +3,9 @@ package template_service
 import (
     "context"
 
-    common "github.com/gotp/proto"
+    glog "github.com/golang/glog"
+    
+    header "github.com/gotp/proto"
     proto "github.com/gotp/proto/template_server"
 )
 
@@ -13,8 +15,9 @@ type TemplateService struct{}
 // Please not remove or modify comment below, it's anchor for new code
 // ############################ INTERFACE ############################
 func (service *TemplateService) Test(ctx context.Context, in *proto.TestRequest) (*proto.TestResponse, error) {
+    glog.V(2).Infoln(in)
     return &proto.TestResponse{
-        Header: &common.ResponseHeader{
+        Header: &header.ResponseHeader{
             Retcode: 0, 
             Retmsg: "ok",
             RequestId: "R0001",
