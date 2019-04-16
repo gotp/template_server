@@ -19,23 +19,19 @@ package main
 import (
 	"flag"
 	glog "github.com/golang/glog"
-	proto "github.com/gotp/proto/template_server"
-	rpc "github.com/gotp/template_server/framework/rpc"
-	confmgr "github.com/gotp/template_server/module/config"
+	framework "github.com/gotp/template_server/framework"
+	module "github.com/gotp/template_server/module"
 	service "github.com/gotp/template_server/service"
-
-	"net/http"
-	"strings"
-
-	"golang.org/x/net/http2"
-	"golang.org/x/net/http2/h2c"
 )
 
 const (
 	defaultConfigFilePath string = "./conf/template_server.conf"
 )
 
-var configManager *confmgr.ConfigManager
+var (
+	configManager *module.ConfigManager
+	server *framework.FrameworkServer
+)
 
 func init() {
 	var configFilePath string
@@ -43,11 +39,17 @@ func init() {
 	flag.Parse()
 
 	// Load config
-	configManager = confmgr.GetInstance()
+	configManager = module.GetConfigManager()
 	if !configManager.Init(configFilePath) {
 		glog.Fatal("Load server config failed!")
 	}
 	glog.Info("Load server config success")
+
+	// Init framework 
+	if !framework.Init() {
+		glog.Fatal("Init framework failed!")
+	}
+	glog.Info("Init framework success")
 
 	/*
 	   	// Load router table
@@ -65,36 +67,13 @@ func init() {
 	*/
 }
 
-func registerService(rpcServer *rpc.RpcServer) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// Please not remove or modify comment below, it's anchor for new code
-	// ############################# SERVICE #############################
-	proto.RegisterTemplateServiceServer(rpcServer.GetServer(), &service.TemplateService{})
-}
-
-func startServer(rpcServer *rpc.RpcServer) {
-	http.ListenAndServe(configManager.Addr,
-		h2c.NewHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if r.ProtoMajor == 2 && strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
-				glog.V(2).Info("Get a rpc request")
-				rpcServer.GetServer().ServeHTTP(w, r)
-			} else {
-				glog.V(2).Info("Get a http request")
-				//httpHandler.ServeHTTP(w, r)
-			}
-		}), &http2.Server{}),
-	)
-}
-
 func main() {
-	// Create servers
-	glog.Info("Create server...")
-	//httpHandler := httpservice.CreateHandler()
-	rpcServer := rpc.NewServer()
+	// Get server
+	server = framework.GetFrameworkServer()
 	// Register service
 	glog.Info("Register service...")
-	registerService(rpcServer)
+	service.RegisterService()
 	// Start server
 	glog.Info("Start server...")
-	startServer(rpcServer)
+	server.Start()
 }

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package config
+package module
 
 import (
 	"bytes"
@@ -31,7 +31,7 @@ const serverConfigPath = "../conf/template_server.conf"
 // internal
 var configManager ConfigManager
 
-func GetInstance() *ConfigManager {
+func GetConfigManager() *ConfigManager {
 	return &configManager
 }
 

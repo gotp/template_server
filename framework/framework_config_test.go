@@ -14,23 +14,20 @@
  * limitations under the License.
  */
 
-package rpc
+package framework
 
 import (
-    "google.golang.org/grpc"
+	"testing"
 )
 
-// RpcServer
-type RpcServer struct {
-	server  *grpc.Server
-}
+func TestInit_Nornmal_Case01(gtest *testing.T) {
+	confMgr := NewFrameworkConfig()
 
-func NewServer() (*RpcServer) {
-	rpcServer := new(RpcServer)
-	rpcServer.server = grpc.NewServer()
-	return rpcServer
-}
-
-func (this *RpcServer) GetServer() (*grpc.Server) {
-	return this.server
+	ret := confMgr.Init()
+	if ret != true {
+		gtest.Fatal("Init failed!")
+	}
+	if confMgr.Addr != "127.0.0.1:8080" {
+		gtest.Fatal("Init failed! ", confMgr.Addr, " != 127.0.0.1:8080")
+	}
 }

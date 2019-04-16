@@ -14,30 +14,19 @@
  * limitations under the License.
  */
 
-package http
+package framework
 
 import (
 	"crypto/tls"
-	"log"
 	"net/http"
-
-	config "github.com/gotp/template_server/module/config"
+	glog "github.com/golang/glog"
 )
-
-// Service handler register
-var handlerFunc map[string]http.HandlerFunc
-
-func RegisterServiceHandler(name string, function http.HandlerFunc) {
-	if handlerFunc == nil {
-		handlerFunc = make(map[string]http.HandlerFunc)
-	}
-	handlerFunc[name] = function
-}
 
 // Http server
 type HttpServer struct {
 	server  *http.Server
 	handler *http.ServeMux
+	handlerFunc map[string]http.HandlerFunc
 }
 
 func NewServer() *HttpServer {
@@ -59,6 +48,13 @@ func NewServer() *HttpServer {
 	return server
 }
 
+func (this *HttpServer) RegisterServiceHandler(name string, function http.HandlerFunc) {
+	if this.handlerFunc == nil {
+		this.handlerFunc = make(map[string]http.HandlerFunc)
+	}
+	this.handlerFunc[name] = function
+}
+
 func (this *HttpServer) Start() {
 	configManager := config.GetConfigManager()
 	if configManager.PemPath != "" && configManager.KeyPath != "" {
@@ -69,9 +65,9 @@ func (this *HttpServer) Start() {
 }
 
 func (this *HttpServer) StartHttpServer() {
-	log.Fatal(this.server.ListenAndServe())
+	glog.Fatal(this.server.ListenAndServe())
 }
 
 func (this *HttpServer) StartHttpsServer(pemPath string, keyPath string) {
-	log.Fatal(this.server.ListenAndServeTLS(pemPath, keyPath))
+	glog.Fatal(this.server.ListenAndServeTLS(pemPath, keyPath))
 }

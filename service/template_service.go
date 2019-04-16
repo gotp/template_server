@@ -1,4 +1,4 @@
-package template_service
+package service
 
 import (
     "context"

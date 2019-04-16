@@ -1,8 +1,11 @@
-I0415 16:02:17.253813    3038 config_manager.go:66] Read config file: ./conf/template_server.conf
-I0415 16:02:17.254719    3038 config_manager.go:68] Results: &{./conf/template_server.conf 127.0.0.1:9003   ../config/router_table.conf}
-I0415 16:02:17.255591    3038 template_server.go:50] Load server config success
-I0415 16:02:17.256089    3038 template_server.go:91] Create server...
-I0415 16:02:17.256596    3038 template_server.go:95] Register service...
-I0415 16:02:17.257243    3038 template_server.go:98] Start server...
-I0415 16:02:37.300578    3038 template_server.go:79] Get a rpc request
-I0415 16:02:37.305435    3038 template_service.go:18] header:<requestId:"R00001" clientId:"C00001" clientType:H5Client version:"V1" testFlag:true > data:<dummy:1 > 
+I0416 12:16:27.035318    4272 config_manager.go:66] Read config file: ./conf/template_server.conf
+I0416 12:16:27.038319    4272 config_manager.go:68] Results: &{./conf/template_server.conf    }
+I0416 12:16:27.038899    4272 template_server.go:46] Load server config success
+I0416 12:16:27.042622    4272 framework_config.go:61] Read config file: ./conf/framework.conf
+I0416 12:16:27.043044    4272 framework_config.go:63] Results: &{127.0.0.1:9003  }
+I0416 12:16:27.043420    4272 template_server.go:52] Init framework success
+I0416 12:16:27.043712    4272 template_server.go:74] Register service...
+I0416 12:16:27.044135    4272 template_server.go:77] Start server...
+I0416 12:16:40.901418    4272 framework_server.go:63] Get a http request
+I0416 12:16:50.448148    4272 framework_server.go:60] Get a rpc request
+I0416 12:16:50.459603    4272 template_service.go:18] header:<requestId:"R00001" clientId:"C00001" clientType:H5Client version:"V1" testFlag:true > data:<dummy:1 > 
