@@ -41,12 +41,13 @@ func GetFrameworkServer() (*FrameworkServer) {
 }
 
 func Init() bool {
-	server.rpcServer = NewRpcServer()
 	server.config = NewFrameworkConfig()
 	if !server.config.Init() {
 		glog.Fatal("Load framework config failed!")
 		return false
 	}
+	server.rpcServer = NewRpcServer()
+	server.httpServer = NewHttpServer(server.config.Addr, server.config.PemPath, server.config.KeyPath)
 	return true
 }
 
@@ -55,7 +56,7 @@ func (this *FrameworkServer) GetRpcServer() (*grpc.Server) {
 }
 
 func (this *FrameworkServer) RegisterHttpHandler(name string, function http.HandlerFunc) {
-	return this.httpServer.RegisterServiceHandler(name, function)
+	this.httpServer.RegisterServiceHandler(name, function)
 }
 
 func (this *FrameworkServer) Start() {

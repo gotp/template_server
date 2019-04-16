@@ -17,8 +17,16 @@
 package service
 
 import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+	"github.com/golang/protobuf/jsonpb"
 	proto "github.com/gotp/proto/template_server"
 	framework "github.com/gotp/template_server/framework"
+)
+
+var (
+	jsonMarshaler = jsonpb.Marshaler{EmitDefaults: true}
 )
 
 func RegisterService() {
@@ -41,7 +49,7 @@ func RegisterService() {
 				fmt.Printf("%v", err)
 				return
 			}
-			rpcResponse, err := new(rpcservice.TemplateService).Test(nil, &rpcRequest)
+			rpcResponse, err := new(TemplateService).Test(nil, &rpcRequest)
 			if err != nil {
 				fmt.Printf("%v", err)
 				return
@@ -52,6 +60,5 @@ func RegisterService() {
 				return
 			}
 			response.Write([]byte(httpReponseBody))
-		}
-	)
+	})
 }
