@@ -23,6 +23,7 @@ import (
 	glog "github.com/golang/glog"
 	"net/http"
 	"strings"
+	"crypto/tls"
 )
 
 var (
@@ -32,8 +33,11 @@ var (
 // Framework server
 type FrameworkServer struct {
 	config *FrameworkConfig
-	rpcServer  *RpcServer
-	httpServer *HttpServer
+	// rpc
+	rpcServer  *grpc.Server
+	// http
+	httpServer  *http.Server
+	httpHandler *http.ServeMux
 }
 
 func GetFrameworkServer() (*FrameworkServer) {
@@ -41,22 +45,31 @@ func GetFrameworkServer() (*FrameworkServer) {
 }
 
 func Init() bool {
+	// load config
 	server.config = NewFrameworkConfig()
 	if !server.config.Init() {
 		glog.Fatal("Load framework config failed!")
 		return false
 	}
-	server.rpcServer = NewRpcServer()
-	server.httpServer = NewHttpServer(server.config.Addr, server.config.PemPath, server.config.KeyPath)
+	// new rpc server
+	server.rpcServer = grpc.NewServer()
+	// new http server
+	server.httpHandler = http.NewServeMux()
+	server.httpServer = &http.Server{
+		Addr:    server.config.Addr,
+		Handler: server.httpHandler,
+		// Disable HTTP/2.
+		TLSNextProto: make(map[string]func(*http.Server, *tls.Conn, http.Handler)),
+	}
 	return true
 }
 
 func (this *FrameworkServer) GetRpcServer() (*grpc.Server) {
-	return this.rpcServer.GetServer()
+	return this.rpcServer
 }
 
 func (this *FrameworkServer) RegisterHttpHandler(name string, function http.HandlerFunc) {
-	this.httpServer.RegisterServiceHandler(name, function)
+	this.httpHandler.HandleFunc(name, function)
 }
 
 func (this *FrameworkServer) Start() {
@@ -67,8 +80,16 @@ func (this *FrameworkServer) Start() {
 				this.rpcServer.ServeHTTP(w, r)
 			} else {
 				glog.V(2).Info("Get a http request")
-				this.httpServer.ServeHTTP(w, r)
+				this.httpHandler.ServeHTTP(w, r)
 			}
 		}), &http2.Server{}),
 	)
+}
+
+func (this *FrameworkServer) StartHttpServer() {
+	glog.Fatal(this.httpServer.ListenAndServe())
+}
+
+func (this *FrameworkServer) StartHttpsServer() {
+	glog.Fatal(this.httpServer.ListenAndServeTLS(this.config.PemPath, this.config.KeyPath))
 }

@@ -17,10 +17,10 @@
 package service
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"github.com/golang/protobuf/jsonpb"
+	glog "github.com/golang/glog"
 	proto "github.com/gotp/proto/template_server"
 	framework "github.com/gotp/template_server/framework"
 )
@@ -40,23 +40,22 @@ func RegisterService() {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Please not remove or modify comment below, it's anchor for new code
 	// ############################# INTERFACE ###########################
-	server.RegisterHttpHandler("",
+	server.RegisterHttpHandler("/gotp/TemplateServer/TemplateService/Test",
 		func(response http.ResponseWriter, request *http.Request) {
 			var rpcRequest proto.TestRequest
 			httpBody, _ := ioutil.ReadAll(request.Body)
 			err := jsonpb.UnmarshalString(string(httpBody), &rpcRequest)
 			if err != nil {
-				fmt.Printf("%v", err)
+				glog.Error("Unmarshal http request failed!", err)
 				return
 			}
 			rpcResponse, err := new(TemplateService).Test(nil, &rpcRequest)
 			if err != nil {
-				fmt.Printf("%v", err)
 				return
 			}
 			httpReponseBody, err := jsonMarshaler.MarshalToString(rpcResponse)
 			if err != nil {
-				fmt.Printf("%v", err)
+				glog.Error("Marshal http response failed!", err)
 				return
 			}
 			response.Write([]byte(httpReponseBody))
